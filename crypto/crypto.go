@@ -19,14 +19,14 @@ func AddressHash(bz []byte) Address {
 	return Address(tmhash.SumTruncated(bz))
 }
 
-type PubKey interface {
+type PubKeyInterface interface {
 	Address() Address
 	Bytes() []byte
 	VerifyBytes(msg []byte, sig []byte) bool
 	Equals(PubKey) bool
 }
 
-type PrivKey interface {
+type PrivKeyInterface interface {
 	Bytes() []byte
 	Sign(msg []byte) ([]byte, error)
 	PubKey() PubKey

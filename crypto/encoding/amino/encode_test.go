@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -20,9 +21,9 @@ type byter interface {
 	Bytes() []byte
 }
 
-func checkAminoBinary(t *testing.T, src, dst interface{}, size int) {
+func checkAminoBinary(t *testing.T, src, dst crypto.PubKey, size int) {
 	// Marshal to binary bytes.
-	bz, err := cdc.MarshalBinaryBare(src)
+	bz, err := proto.Marshal(src)
 	require.Nil(t, err, "%+v", err)
 	if byterSrc, ok := src.(byter); ok {
 		// Make sure this is compatible with current (Bytes()) encoding.
@@ -32,7 +33,7 @@ func checkAminoBinary(t *testing.T, src, dst interface{}, size int) {
 	assert.Equal(t, size, len(bz), "Amino binary size mismatch")
 
 	// Unmarshal.
-	err = cdc.UnmarshalBinaryBare(bz, dst)
+	err = proto.Unmarshal(bz, dst)
 	require.Nil(t, err, "%+v", err)
 }
 
