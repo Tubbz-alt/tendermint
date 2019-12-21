@@ -9,7 +9,7 @@ import (
 )
 
 func BenchmarkKeyGeneration(b *testing.B) {
-	benchmarkKeygenWrapper := func(reader io.Reader) crypto.PrivKey {
+	benchmarkKeygenWrapper := func(reader io.Reader) crypto.PrivKeyInterface {
 		return genPrivKey(reader)
 	}
 	benchmarking.BenchmarkKeyGeneration(b, benchmarkKeygenWrapper)

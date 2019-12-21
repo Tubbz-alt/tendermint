@@ -28,34 +28,10 @@ const (
 // PrivKeyEd25519 implements crypto.PrivKey.
 type PrivKeyEd25519 [SignatureSize]byte
 
-func (privKey PrivKeyEd25519) Marshal() ([]byte, error) {
-	pKey := crypto.PrivKey{
-		PrivKey: &crypto.PrivKey_Ed25519{privKey[:]},
-	}
-
-	return proto.Marshal(&pKey)
-}
-
-func (privKey PrivKeyEd25519) Unmarshal(bz []byte, dest *crypto.PrivKeyInterface) error {
-	var pk crypto.PrivKey
-	err := proto.Unmarshal(bz, &pk)
-	if err != nil {
-		return err
-	}
-	key := pk
-	k2, ok := key.GetPrivKey().(crypto.PrivKeyInterface)
-	if !ok {
-		return fmt.Errorf("deserialized account %+v does not implement PrivKeyInterface", key)
-	}
-	fmt.Println(k2.PubKey())
-	*dest = k2
-	return nil
-}
-
 // Bytes marshals the privkey using amino encoding.
 func (privKey PrivKeyEd25519) Bytes() ([]byte, error) {
 	pKey := crypto.PrivKey{
-		PrivKey: &crypto.PrivKey_Ed25519{privKey[:]},
+		Key: &crypto.PrivKey_Ed25519{privKey[:]},
 	}
 
 	return proto.Marshal(&pKey)
@@ -150,37 +126,15 @@ const PubKeyEd25519Size = 32
 // PubKeyEd25519 implements crypto.PubKey for the Ed25519 signature scheme.
 type PubKeyEd25519 [PubKeyEd25519Size]byte
 
-func (pk PubKeyEd25519) Marshal() ([]byte, error) {
-	pKey := crypto.PubKey{
-		PubKey: &crypto.PubKey_Ed25519{pk[:]},
-	}
-
-	return proto.Marshal(&pKey)
-}
-
-func (cdc PubKeyEd25519) Unmarshal(bz []byte, dest *crypto.PubKeyInterface) error {
-	var pk crypto.PubKey
-	err := proto.Unmarshal(bz, &pk)
-	if err != nil {
-		return err
-	}
-	key, ok := pk.PubKey.(crypto.PubKeyInterface)
-	if !ok {
-		return fmt.Errorf("deserialized account %+v does not implement PrivKeyInterface", key)
-	}
-	*dest = key
-	return nil
-}
-
 // Address is the SHA256-20 of the raw pubkey bytes.
 func (pubKey PubKeyEd25519) Address() crypto.Address {
 	return crypto.Address(tmhash.SumTruncated(pubKey[:]))
 }
 
-// Bytes marshals the PubKey using amino encoding.
+// Bytes marshals the PubKey using pro encoding.
 func (pubKey PubKeyEd25519) Bytes() ([]byte, error) {
 	pKey := crypto.PubKey{
-		PubKey: &crypto.PubKey_Ed25519{pubKey[:]},
+		Key: &crypto.PubKey_Ed25519{pubKey[:]},
 	}
 	return proto.Marshal(&pKey)
 }

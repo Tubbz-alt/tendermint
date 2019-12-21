@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/gogo/protobuf/proto"
 	"github.com/tendermint/tendermint/crypto"
 
 	schnorrkel "github.com/ChainSafe/go-schnorrkel"
@@ -13,12 +14,18 @@ import (
 // PrivKeySr25519Size is the number of bytes in an Sr25519 private key.
 const PrivKeySr25519Size = 32
 
+var _ crypto.PrivKeyInterface = PrivKeySr25519{}
+
 // PrivKeySr25519 implements crypto.PrivKey.
 type PrivKeySr25519 [PrivKeySr25519Size]byte
 
 // Bytes marshals the privkey using amino encoding.
-func (privKey PrivKeySr25519) Bytes() []byte {
-	return cdc.MustMarshalBinaryBare(privKey)
+func (privKey PrivKeySr25519) Bytes() ([]byte, error) {
+	pKey := crypto.PrivKey{
+		Key: &crypto.PrivKey_Sr25519{privKey[:]},
+	}
+
+	return proto.Marshal(&pKey)
 }
 
 // Sign produces a signature on the provided message.
@@ -41,7 +48,7 @@ func (privKey PrivKeySr25519) Sign(msg []byte) ([]byte, error) {
 }
 
 // PubKey gets the corresponding public key from the private key.
-func (privKey PrivKeySr25519) PubKey() crypto.PubKey {
+func (privKey PrivKeySr25519) PubKey() crypto.PubKeyInterface {
 
 	secretKey := &(schnorrkel.SecretKey{})
 	err := secretKey.Decode(privKey)
@@ -56,7 +63,7 @@ func (privKey PrivKeySr25519) PubKey() crypto.PubKey {
 
 // Equals - you probably don't need to use this.
 // Runs in constant time based on length of the keys.
-func (privKey PrivKeySr25519) Equals(other crypto.PrivKey) bool {
+func (privKey PrivKeySr25519) Equals(other crypto.PrivKeyInterface) bool {
 	if otherEd, ok := other.(PrivKeySr25519); ok {
 		return subtle.ConstantTimeCompare(privKey[:], otherEd[:]) == 1
 	}

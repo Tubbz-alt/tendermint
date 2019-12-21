@@ -1,55 +1,36 @@
 package secp256k1
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"crypto/subtle"
-	"fmt"
 	"io"
 	"math/big"
 
-	"golang.org/x/crypto/ripemd160"
-
 	secp256k1 "github.com/btcsuite/btcd/btcec"
-
-	amino "github.com/tendermint/go-amino"
+	"github.com/gogo/protobuf/proto"
 
 	"github.com/tendermint/tendermint/crypto"
 )
 
-//-------------------------------------
-const (
-	PrivKeyAminoName = "tendermint/PrivKeySecp256k1"
-	PubKeyAminoName  = "tendermint/PubKeySecp256k1"
-)
+var _ crypto.PrivKeyInterface = PrivKeySecp256k1{}
 
-var cdc = amino.NewCodec()
-
-func init() {
-	cdc.RegisterInterface((*crypto.PubKey)(nil), nil)
-	cdc.RegisterConcrete(PubKeySecp256k1{},
-		PubKeyAminoName, nil)
-
-	cdc.RegisterInterface((*crypto.PrivKey)(nil), nil)
-	cdc.RegisterConcrete(PrivKeySecp256k1{},
-		PrivKeyAminoName, nil)
-}
-
-//-------------------------------------
-
-var _ crypto.PrivKey = PrivKeySecp256k1{}
+const PrivKeySize = 32
 
 // PrivKeySecp256k1 implements PrivKey.
-type PrivKeySecp256k1 [32]byte
+type PrivKeySecp256k1 [PrivKeySize]byte
 
 // Bytes marshalls the private key using amino encoding.
-func (privKey PrivKeySecp256k1) Bytes() []byte {
-	return cdc.MustMarshalBinaryBare(privKey)
+func (privKey PrivKeySecp256k1) Bytes() ([]byte, error) {
+	pKey := crypto.PrivKey{
+		PrivKey: &crypto.PrivKey_Secp256K1{privKey[:]},
+	}
+
+	return proto.Marshal(&pKey)
 }
 
 // PubKey performs the point-scalar multiplication from the privKey on the
 // generator point to get the pubkey.
-func (privKey PrivKeySecp256k1) PubKey() crypto.PubKey {
+func (privKey PrivKeySecp256k1) PubKey() crypto.PubKeyInterface {
 	_, pubkeyObject := secp256k1.PrivKeyFromBytes(secp256k1.S256(), privKey[:])
 	var pubkeyBytes PubKeySecp256k1
 	copy(pubkeyBytes[:], pubkeyObject.SerializeCompressed())
@@ -58,7 +39,7 @@ func (privKey PrivKeySecp256k1) PubKey() crypto.PubKey {
 
 // Equals - you probably don't need to use this.
 // Runs in constant time based on length of the keys.
-func (privKey PrivKeySecp256k1) Equals(other crypto.PrivKey) bool {
+func (privKey PrivKeySecp256k1) Equals(other crypto.PrivKeyInterface) bool {
 	if otherSecp, ok := other.(PrivKeySecp256k1); ok {
 		return subtle.ConstantTimeCompare(privKey[:], otherSecp[:]) == 1
 	}
@@ -122,50 +103,4 @@ func GenPrivKeySecp256k1(secret []byte) PrivKeySecp256k1 {
 	copy(privKey32[32-len(feB):32], feB)
 
 	return PrivKeySecp256k1(privKey32)
-}
-
-//-------------------------------------
-
-var _ crypto.PubKey = PubKeySecp256k1{}
-
-// PubKeySecp256k1Size is comprised of 32 bytes for one field element
-// (the x-coordinate), plus one byte for the parity of the y-coordinate.
-const PubKeySecp256k1Size = 33
-
-// PubKeySecp256k1 implements crypto.PubKey.
-// It is the compressed form of the pubkey. The first byte depends is a 0x02 byte
-// if the y-coordinate is the lexicographically largest of the two associated with
-// the x-coordinate. Otherwise the first byte is a 0x03.
-// This prefix is followed with the x-coordinate.
-type PubKeySecp256k1 [PubKeySecp256k1Size]byte
-
-// Address returns a Bitcoin style addresses: RIPEMD160(SHA256(pubkey))
-func (pubKey PubKeySecp256k1) Address() crypto.Address {
-	hasherSHA256 := sha256.New()
-	hasherSHA256.Write(pubKey[:]) // does not error
-	sha := hasherSHA256.Sum(nil)
-
-	hasherRIPEMD160 := ripemd160.New()
-	hasherRIPEMD160.Write(sha) // does not error
-	return crypto.Address(hasherRIPEMD160.Sum(nil))
-}
-
-// Bytes returns the pubkey marshalled with amino encoding.
-func (pubKey PubKeySecp256k1) Bytes() []byte {
-	bz, err := cdc.MarshalBinaryBare(pubKey)
-	if err != nil {
-		panic(err)
-	}
-	return bz
-}
-
-func (pubKey PubKeySecp256k1) String() string {
-	return fmt.Sprintf("PubKeySecp256k1{%X}", pubKey[:])
-}
-
-func (pubKey PubKeySecp256k1) Equals(other crypto.PubKey) bool {
-	if otherSecp, ok := other.(PubKeySecp256k1); ok {
-		return bytes.Equal(pubKey[:], otherSecp[:])
-	}
-	return false
 }

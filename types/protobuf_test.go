@@ -22,7 +22,7 @@ func TestABCIPubKey(t *testing.T) {
 	testABCIPubKey(t, pkSecp, ABCIPubKeyTypeSecp256k1)
 }
 
-func testABCIPubKey(t *testing.T, pk crypto.PubKey, typeStr string) {
+func testABCIPubKey(t *testing.T, pk crypto.PubKeyInterface, typeStr string) {
 	abciPubKey := TM2PB.PubKey(pk)
 	pk2, err := PB2TM.PubKey(abciPubKey)
 	assert.Nil(t, err)

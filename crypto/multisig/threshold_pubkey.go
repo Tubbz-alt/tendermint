@@ -10,7 +10,7 @@ type PubKeyMultisigThreshold struct {
 	PubKeys []crypto.PubKey `json:"pubkeys"`
 }
 
-var _ crypto.PubKey = PubKeyMultisigThreshold{}
+var _ crypto.PubKeyInterface = PubKeyMultisigThreshold{}
 
 // NewPubKeyMultisigThreshold returns a new PubKeyMultisigThreshold.
 // Panics if len(pubkeys) < k or 0 >= k.
@@ -79,7 +79,7 @@ func (pk PubKeyMultisigThreshold) Address() crypto.Address {
 
 // Equals returns true iff pk and other both have the same number of keys, and
 // all constituent keys are the same, and in the same order.
-func (pk PubKeyMultisigThreshold) Equals(other crypto.PubKey) bool {
+func (pk PubKeyMultisigThreshold) Equals(other crypto.PubKeyInterface) bool {
 	otherKey, sameType := other.(PubKeyMultisigThreshold)
 	if !sameType {
 		return false

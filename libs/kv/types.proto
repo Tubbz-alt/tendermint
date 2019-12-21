@@ -1,8 +1,8 @@
 syntax = "proto3";
 package tendermint.libs.kv;
-option go_package = "github.com/tendermint/tendermint/libs/kv";
+option go_package = "kv";
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "gogoproto/gogo.proto";
 
 option (gogoproto.marshaler_all) = true;
 option (gogoproto.unmarshaler_all) = true;

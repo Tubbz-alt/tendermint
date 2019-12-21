@@ -1,9 +1,9 @@
 syntax = "proto3";
 package tendermint.rpc.grpc;
-option go_package = "github.com/tendermint/tendermint/rpc/grpc;core_grpc";
+option go_package = "coregrpc";
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-import "github.com/tendermint/tendermint/abci/types/types.proto";
+import "gogoproto/gogo.proto";
+import "abci/types/types.proto";
 
 option (gogoproto.marshaler_all) = true;
 option (gogoproto.unmarshaler_all) = true;
@@ -33,8 +33,8 @@ message ResponsePing{
 }
 
 message ResponseBroadcastTx{
-  tendermint.abci.types.ResponseCheckTx check_tx = 1;
-  tendermint.abci.types.ResponseDeliverTx deliver_tx = 2;
+  abci.types.ResponseCheckTx check_tx = 1;
+  abci.types.ResponseDeliverTx deliver_tx = 2;
 }
 
 //----------------------------------------

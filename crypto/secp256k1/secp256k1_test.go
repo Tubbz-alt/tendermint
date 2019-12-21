@@ -87,6 +87,7 @@ func TestSecp256k1LoadPrivkeyAndSerializeIsIdentity(t *testing.T) {
 }
 
 func TestGenPrivKeySecp256k1(t *testing.T) {
+	t.Parallel()
 	// curve oder N
 	N := underlyingSecp256k1.S256().N
 	tests := []struct {

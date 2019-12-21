@@ -1,0 +1,106 @@
+protoc:
+  version: 3.8.0
+
+  # Additional paths to include with -I to protoc.
+  # By default, the directory of the config file is included,
+  # or the current directory if there is no config file.
+  allow_unused_imports: false
+  includes:
+      # - .
+      - vendor/github.com/gogo/protobuf
+
+
+# Create directives.
+#create:
+  # List of mappings from relative directory to base package.
+  # This affects how packages are generated with create.
+  #packages:
+    # This means that a file created "foo.proto" in the current directory will have package "bar".
+    # A file created "a/b/foo.proto" will have package "bar.a.b".
+    #- directory: .
+    #  name: bar
+    # This means that a file created "idl/code.uber/a/b/c.proto" will have package "uber.a.b".
+    #- directory: idl/code.uber
+    #  name: uber
+
+# Lint directives.
+lint:
+  group: uber2
+excludes:
+  - .git
+  - vendor
+
+  # Linter files to ignore.
+  # These can either be file or directory names.
+  # If there is a directory name, that directory and all sub-directories will be ignored.
+#  ignores:
+#    - id: RPC_NAMES_CAMEL_CASE
+#      files:
+#        - path/to/foo.proto
+#        - path/to/bar.proto
+#    - id: SYNTAX_PROTO3
+#      files:
+#        - path/to/dir
+
+  # Linter rules.
+  # Run prototool lint --list-all-linters to see all available linters.
+  # Run prototool lint --list-linters to see the currently configured linters.
+#  rules:
+
+    # The specific linters to add.
+#    add:
+#      - ENUM_NAMES_CAMEL_CASE
+#      - ENUM_NAMES_CAPITALIZED
+
+    # The specific linters to remove.
+#    remove:
+#      - ENUM_NAMES_CAMEL_CASE
+
+  # The path to the file header or the file header content for all Protobuf files.
+  # If either path or content is set and the FILE_HEADER linter is turned on,
+  # files will be checked to begin with the given header, and format --fix
+  # will place this header before the syntax declaration. Note that
+  # format --fix will delete anything before the syntax declaration
+  # if this is set.
+  #
+  # Set path to use a file's contents for the header. Path must be relative.
+  # Set content to directly specify the header.
+  # **Both path and content cannot be set at the same time. They are only done
+  # so here for example purposes.**
+  #
+  # If is_commented is set, this file is assumed to already have comments
+  # and will be added directly. If is_commented is not set, "// " will be
+  # added before every line.
+#  file_header:
+#    path: path/to/protobuf_file_header.txt
+#    content: |
+#      //
+#      // Acme, Inc. (c) 2019
+#      //
+#    is_commented: true
+  # Override the default java_package file option prefix of "com".
+  # If this is set, this will affect lint, create, and format --fix to use.
+  # this prefix instead of "com".
+#  java_package_prefix: au.com
+
+# Breaking change detector directives.
+#break:
+  # Include beta packages in breaking change detection.
+  # Beta packages have the form "foo.bar.vMAJORbetaBETA" where MAJOR > 0 and BETA > 0.
+  # By default, beta packages are ignored.
+  #include_beta: true
+  # Allow stable packages to depend on beta packages.
+  # By default, the breaking change detector will error if a stable package
+  # depends on a breaking package.
+  # If include_beta is true, this is implicitly set.
+  #allow_beta_deps: true
+
+# Code generation directives.
+generate:
+  go_options:
+    import_path: github.com/tendermint/tendermint
+  plugins:
+    - name: gogo
+      type: gogo
+      flags: plugins=grpc
+      output: .

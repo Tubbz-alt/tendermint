@@ -1,9 +1,20 @@
 syntax = "proto3";
 package tendermint.crypto.crypto;
-option go_package = "github.com/tendermint/tendermint/crypto";
+option go_package = "crypto";
+
+import "gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.goproto_registration) = true;
+// Generate tests
+option (gogoproto.populate_all) = true;
+option (gogoproto.equal_all) = true;
+option (gogoproto.testgen_all) = true;
 
 message PubKey {
-  oneof pub_key {
+  oneof key {
     bytes ed25519 = 1;
     bytes sr25519 = 2;
     bytes secp256k1 = 3;
@@ -11,7 +22,7 @@ message PubKey {
 }
 
 message PrivKey {
-  oneof priv_key {
+  oneof key {
     bytes ed25519 = 1;
     bytes sr25519 = 2;
     bytes secp256k1 = 3;

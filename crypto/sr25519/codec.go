@@ -1,11 +1,11 @@
 package sr25519
 
 import (
-	amino "github.com/tendermint/go-amino"
+	"github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/crypto"
 )
 
-var _ crypto.PrivKey = PrivKeySr25519{}
+var _ crypto.PrivKeyInterface = PrivKeySr25519{}
 
 const (
 	PrivKeyAminoName = "tendermint/PrivKeySr25519"
@@ -19,7 +19,7 @@ const (
 var cdc = amino.NewCodec()
 
 func init() {
-	cdc.RegisterInterface((*crypto.PubKey)(nil), nil)
+	cdc.RegisterInterface((*crypto.PubKeyInterface)(nil), nil)
 	cdc.RegisterConcrete(PubKeySr25519{},
 		PubKeyAminoName, nil)
 

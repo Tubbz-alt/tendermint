@@ -1,7 +1,6 @@
 package ed25519_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,14 +26,4 @@ func TestSignAndValidateEd25519(t *testing.T) {
 	sig[7] ^= byte(0x01)
 
 	assert.False(t, pubKey.VerifyBytes(msg, sig))
-}
-
-func TestMarshal(t *testing.T) {
-	privKey := ed25519.GenPrivKey()
-
-	bz, _ := privKey.Marshal()
-
-	var pKey crypto.PrivKeyInterface
-	err := privKey.Unmarshal(bz, &pKey)
-	fmt.Println(err)
 }

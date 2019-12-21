@@ -23,7 +23,7 @@ func NewMultisig(n int) *Multisignature {
 }
 
 // GetIndex returns the index of pk in keys. Returns -1 if not found
-func getIndex(pk crypto.PubKey, keys []crypto.PubKey) int {
+func getIndex(pk crypto.PubKeyInterface, keys []crypto.PubKeyInterface) int {
 	for i := 0; i < len(keys); i++ {
 		if pk.Equals(keys[i]) {
 			return i
@@ -56,15 +56,17 @@ func (mSig *Multisignature) AddSignature(sig []byte, index int) {
 
 // AddSignatureFromPubKey adds a signature to the multisig, at the index in
 // keys corresponding to the provided pubkey.
-func (mSig *Multisignature) AddSignatureFromPubKey(sig []byte, pubkey crypto.PubKey, keys []crypto.PubKey) error {
+func (mSig *Multisignature) AddSignatureFromPubKey(sig []byte, pubkey crypto.PubKeyInterface, keys []crypto.PubKeyInterface) error {
 	index := getIndex(pubkey, keys)
 	if index == -1 {
 		keysStr := make([]string, len(keys))
 		for i, k := range keys {
-			keysStr[i] = fmt.Sprintf("%X", k.Bytes())
+			kBytes, _ := k.Bytes()
+			keysStr[i] = fmt.Sprintf("%X", kBytes)
 		}
+		pkey, _ := pubkey.Bytes()
 
-		return fmt.Errorf("provided key %X doesn't exist in pubkeys: \n%s", pubkey.Bytes(), strings.Join(keysStr, "\n"))
+		return fmt.Errorf("provided key %X doesn't exist in pubkeys: \n%s", pkey, strings.Join(keysStr, "\n"))
 	}
 
 	mSig.AddSignature(sig, index)
