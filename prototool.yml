@@ -13,9 +13,9 @@ generate:
     go_options:
       import_path: github.com/tendermint/tendermint
       extra_modifiers:
-        google/api/annotations.proto: google.golang.org/genproto/googleapis/api/annotations
-        google/api/http.proto: google.golang.org/genproto/googleapis/api/annotations
-#        gogoproto/gogo.proto: github.com/gogo/protobuf
+        # google/api/annotations.proto: google.golang.org/genproto/googleapis/api/annotations
+        # google/api/http.proto: google.golang.org/genproto/googleapis/api/annotations
+        gogoproto/gogo.proto: github.com/gogo/protobuf
 
     plugins:
       - name: gogoslick

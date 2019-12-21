@@ -42,11 +42,13 @@ func (privKey PrivKeyEd25519) Unmarshal(bz []byte, dest *crypto.PrivKeyInterface
 	if err != nil {
 		return err
 	}
-	key, ok := pk.PrivKey.(crypto.PrivKeyInterface)
+	key := pk
+	k2, ok := key.GetPrivKey().(crypto.PrivKeyInterface)
 	if !ok {
 		return fmt.Errorf("deserialized account %+v does not implement PrivKeyInterface", key)
 	}
-	*dest = key
+	fmt.Println(k2.PubKey())
+	*dest = k2
 	return nil
 }
 

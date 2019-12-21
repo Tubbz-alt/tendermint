@@ -37,6 +37,4 @@ func TestMarshal(t *testing.T) {
 	var pKey crypto.PrivKeyInterface
 	err := privKey.Unmarshal(bz, &pKey)
 	fmt.Println(err)
-
-	fmt.Println(bz, pKey.PubKey(), privKey.PubKey())
 }
