@@ -39,6 +39,10 @@ install_c:
 ########################################
 ### Protobuf
 
+proto-gen:
+	go mod vendor
+	prototool generate
+
 protoc_all: protoc_libs protoc_merkle protoc_abci protoc_grpc protoc_proto3types
 
 %.pb.go: %.proto
