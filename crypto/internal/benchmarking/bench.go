@@ -24,7 +24,7 @@ func (zeroReader) Read(buf []byte) (int, error) {
 
 // BenchmarkKeyGeneration benchmarks the given key generation algorithm using
 // a dummy reader.
-func BenchmarkKeyGeneration(b *testing.B, generateKey func(reader io.Reader) crypto.PrivKey) {
+func BenchmarkKeyGeneration(b *testing.B, generateKey func(reader io.Reader) crypto.PrivKeyInterface) {
 	var zero zeroReader
 	for i := 0; i < b.N; i++ {
 		generateKey(zero)
@@ -33,7 +33,7 @@ func BenchmarkKeyGeneration(b *testing.B, generateKey func(reader io.Reader) cry
 
 // BenchmarkSigning benchmarks the given signing algorithm using
 // the provided privkey.
-func BenchmarkSigning(b *testing.B, priv crypto.PrivKey) {
+func BenchmarkSigning(b *testing.B, priv crypto.PrivKeyInterface) {
 	message := []byte("Hello, world!")
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -43,7 +43,7 @@ func BenchmarkSigning(b *testing.B, priv crypto.PrivKey) {
 
 // BenchmarkVerification benchmarks the given verification algorithm using
 // the provided privkey on a constant message.
-func BenchmarkVerification(b *testing.B, priv crypto.PrivKey) {
+func BenchmarkVerification(b *testing.B, priv crypto.PrivKeyInterface) {
 	pub := priv.PubKey()
 	// use a short message, so this time doesn't get dominated by hashing.
 	message := []byte("Hello, world!")

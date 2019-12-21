@@ -21,13 +21,13 @@ func AddressHash(bz []byte) Address {
 
 type PubKeyInterface interface {
 	Address() Address
-	Marshal([]byte) ([]byte, error)
+	Bytes() ([]byte, error)
 	VerifyBytes(msg []byte, sig []byte) bool
 	Equals(PubKeyInterface) bool
 }
 
 type PrivKeyInterface interface {
-	Marshal([]byte) ([]byte, error)
+	Bytes() ([]byte, error)
 	Sign(msg []byte) ([]byte, error)
 	PubKey() PubKeyInterface
 	Equals(PrivKeyInterface) bool

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	amino "github.com/tendermint/go-amino"
+	"github.com/gogo/protobuf/proto"
 	"golang.org/x/crypto/ed25519"
 
 	"github.com/tendermint/tendermint/crypto"
@@ -15,7 +15,7 @@ import (
 
 //-------------------------------------
 
-var _ crypto.PrivKey = PrivKeyEd25519{}
+var _ crypto.PrivKeyInterface = PrivKeyEd25519{}
 
 const (
 	PrivKeyAminoName = "tendermint/PrivKeyEd25519"
@@ -25,24 +25,38 @@ const (
 	SignatureSize = 64
 )
 
-var cdc = amino.NewCodec()
+// PrivKeyEd25519 implements crypto.PrivKey.
+type PrivKeyEd25519 [SignatureSize]byte
 
-func init() {
-	cdc.RegisterInterface((*crypto.PubKey)(nil), nil)
-	// cdc.RegisterConcrete(PubKeyEd25519{},
-	// 	PubKeyAminoName, nil)
+func (privKey PrivKeyEd25519) Marshal() ([]byte, error) {
+	pKey := crypto.PrivKey{
+		PrivKey: &crypto.PrivKey_Ed25519{privKey[:]},
+	}
 
-	cdc.RegisterInterface((*crypto.PrivKey)(nil), nil)
-	// cdc.RegisterConcrete(PrivKeyEd25519{},
-	// 	PrivKeyAminoName, nil)
+	return proto.Marshal(&pKey)
 }
 
-// PrivKeyEd25519 implements crypto.PrivKey.
-type PrivKeyEd25519 [64]byte
+func (privKey PrivKeyEd25519) Unmarshal(bz []byte, dest *crypto.PrivKeyInterface) error {
+	var pk crypto.PrivKey
+	err := proto.Unmarshal(bz, &pk)
+	if err != nil {
+		return err
+	}
+	key, ok := pk.PrivKey.(crypto.PrivKeyInterface)
+	if !ok {
+		return fmt.Errorf("deserialized account %+v does not implement PrivKeyInterface", key)
+	}
+	*dest = key
+	return nil
+}
 
 // Bytes marshals the privkey using amino encoding.
-func (privKey PrivKeyEd25519) Bytes() []byte {
-	return cdc.MustMarshalBinaryBare(privKey)
+func (privKey PrivKeyEd25519) Bytes() ([]byte, error) {
+	pKey := crypto.PrivKey{
+		PrivKey: &crypto.PrivKey_Ed25519{privKey[:]},
+	}
+
+	return proto.Marshal(&pKey)
 }
 
 // Sign produces a signature on the provided message.
@@ -58,7 +72,7 @@ func (privKey PrivKeyEd25519) Sign(msg []byte) ([]byte, error) {
 }
 
 // PubKey gets the corresponding public key from the private key.
-func (privKey PrivKeyEd25519) PubKey() crypto.PubKey {
+func (privKey PrivKeyEd25519) PubKey() crypto.PubKeyInterface {
 	privKeyBytes := [64]byte(privKey)
 	initialized := false
 	// If the latter 32 bytes of the privkey are all zero, compute the pubkey
@@ -82,7 +96,7 @@ func (privKey PrivKeyEd25519) PubKey() crypto.PubKey {
 
 // Equals - you probably don't need to use this.
 // Runs in constant time based on length of the keys.
-func (privKey PrivKeyEd25519) Equals(other crypto.PrivKey) bool {
+func (privKey PrivKeyEd25519) Equals(other crypto.PrivKeyInterface) bool {
 	if otherEd, ok := other.(PrivKeyEd25519); ok {
 		return subtle.ConstantTimeCompare(privKey[:], otherEd[:]) == 1
 	}
@@ -126,7 +140,7 @@ func GenPrivKeyFromSecret(secret []byte) PrivKeyEd25519 {
 
 //-------------------------------------
 
-var _ crypto.PubKey = PubKeyEd25519{}
+var _ crypto.PubKeyInterface = PubKeyEd25519{}
 
 // PubKeyEd25519Size is the number of bytes in an Ed25519 signature.
 const PubKeyEd25519Size = 32
@@ -134,18 +148,39 @@ const PubKeyEd25519Size = 32
 // PubKeyEd25519 implements crypto.PubKey for the Ed25519 signature scheme.
 type PubKeyEd25519 [PubKeyEd25519Size]byte
 
+func (pk PubKeyEd25519) Marshal() ([]byte, error) {
+	pKey := crypto.PubKey{
+		PubKey: &crypto.PubKey_Ed25519{pk[:]},
+	}
+
+	return proto.Marshal(&pKey)
+}
+
+func (cdc PubKeyEd25519) Unmarshal(bz []byte, dest *crypto.PubKeyInterface) error {
+	var pk crypto.PubKey
+	err := proto.Unmarshal(bz, &pk)
+	if err != nil {
+		return err
+	}
+	key, ok := pk.PubKey.(crypto.PubKeyInterface)
+	if !ok {
+		return fmt.Errorf("deserialized account %+v does not implement PrivKeyInterface", key)
+	}
+	*dest = key
+	return nil
+}
+
 // Address is the SHA256-20 of the raw pubkey bytes.
 func (pubKey PubKeyEd25519) Address() crypto.Address {
 	return crypto.Address(tmhash.SumTruncated(pubKey[:]))
 }
 
 // Bytes marshals the PubKey using amino encoding.
-func (pubKey PubKeyEd25519) Bytes() []byte {
-	bz, err := cdc.MarshalBinaryBare(pubKey)
-	if err != nil {
-		panic(err)
+func (pubKey PubKeyEd25519) Bytes() ([]byte, error) {
+	pKey := crypto.PubKey{
+		PubKey: &crypto.PubKey_Ed25519{pubKey[:]},
 	}
-	return bz
+	return proto.Marshal(&pKey)
 }
 
 func (pubKey PubKeyEd25519) VerifyBytes(msg []byte, sig []byte) bool {
@@ -161,7 +196,7 @@ func (pubKey PubKeyEd25519) String() string {
 }
 
 // nolint: golint
-func (pubKey PubKeyEd25519) Equals(other crypto.PubKey) bool {
+func (pubKey PubKeyEd25519) Equals(other crypto.PubKeyInterface) bool {
 	if otherEd, ok := other.(PubKeyEd25519); ok {
 		return bytes.Equal(pubKey[:], otherEd[:])
 	}
