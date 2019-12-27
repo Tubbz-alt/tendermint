@@ -1,13 +1,22 @@
 package crypto
 
-import fmt "fmt"
+import (
+	fmt "fmt"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
+	"github.com/tendermint/tendermint/crypto/sr25519"
+)
 
 func MarshalPubKey(pki PubKeyInterface) ([]byte, error) {
-	asOneof, ok := pki.(isPubKey_Key)
-	if !ok {
-		return nil, fmt.Errorf("key %+v not handled by codec", pki)
+	var asOneof isPubKey_Key
+	switch pki := pki.(type) {
+	case ed25519.PubKeyEd25519:
+		asOneof = &PubKey_Ed25519{Ed25519: pki[:]}
+	case sr25519.PubKeySr25519:
+		asOneof = &PubKey_Sr25519{Sr25519: pki[:]}
+	case secp256k1.PubKeySecp256k1:
+		asOneof = &PubKey_Secp256K1{Secp256K1: pki[:]}
 	}
-
 	protoKey := PubKey{
 		Key: asOneof,
 	}
@@ -20,12 +29,10 @@ func UnmarshalPubKey(bz []byte, dest *PubKeyInterface) error {
 	if err != nil {
 		return err
 	}
-	acc, ok := protoKey.Key.(PubKeyInterface)
-	if !ok {
-		return fmt.Errorf("deserialized account %+v does not implement Account interface", acc)
+	switch asOneof := protoKey.Key.(type) {
+	// TODO
 	}
-	*dest = acc
-	return nil
+	return fmt.Errorf("couldn't unmarshal pubkey %+v", protoKey)
 }
 
 func MarshalPrivKey(pki PrivKeyInterface) ([]byte, error) {
