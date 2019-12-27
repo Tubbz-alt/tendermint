@@ -12,11 +12,13 @@ import (
 
 func TestEncoding(t *testing.T) {
 	pKey := ed25519.GenPrivKey()
+
 	bz, err := crypto.MarshalPrivKey(pKey)
 	fmt.Println(bz)
 	require.NoError(t, err)
+
 	var c crypto.PrivKeyInterface
-	err = crypto.UnmarshalPrivKey(pKey[:], &c)
+	err = crypto.UnmarshalPrivKey(bz, &c)
 	require.NoError(t, err)
 	require.NotNil(t, bz)
 
