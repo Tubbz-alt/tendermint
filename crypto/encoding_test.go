@@ -1,7 +1,7 @@
 package crypto_test
 
 import (
-	"fmt"
+	fmt "fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -15,19 +15,9 @@ func TestEncoding(t *testing.T) {
 	bz, err := crypto.MarshalPrivKey(pKey)
 	fmt.Println(bz)
 	require.NoError(t, err)
+	var c crypto.PrivKeyInterface
+	err = crypto.UnmarshalPrivKey(pKey[:], &c)
+	require.NoError(t, err)
 	require.NotNil(t, bz)
 
 }
-
-func TestDecoding(t *testing.T) {
-	pk := ed25519.GenPrivKey()
-
-	bz, _ := pk.Bytes()
-	var c crypto.PrivKeyInterface
-	// var ed ed25519.PrivKeyEd25519
-	crypto.UnmarshalPrivKey(bz, &c)
-	fmt.Println(c)
-
-}
-
-//

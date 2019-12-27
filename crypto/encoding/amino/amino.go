@@ -47,23 +47,23 @@ func PubkeyAminoName(cdc *amino.Codec, key crypto.PubKey) (string, bool) {
 // RegisterAmino registers all crypto related types in the given (amino) codec.
 func RegisterAmino(cdc *amino.Codec) {
 	// These are all written here instead of
-	cdc.RegisterInterface((*crypto.PubKey)(nil), nil)
-	// cdc.RegisterConcrete(ed25519.PubKeyEd25519{},
-	// ed25519.PubKeyAminoName, nil)
-	// cdc.RegisterConcrete(sr25519.PubKeySr25519{},
-	// sr25519.PubKeyAminoName, nil)
-	// cdc.RegisterConcrete(secp256k1.PubKeySecp256k1{},
-	// secp256k1.PubKeyAminoName, nil)
-	// cdc.RegisterConcrete(multisig.PubKeyMultisigThreshold{},
-	// 	multisig.PubKeyMultisigThresholdAminoRoute, nil)
+	cdc.RegisterInterface((*crypto.PubKeyInterface)(nil), nil)
+	cdc.RegisterConcrete(ed25519.PubKeyEd25519{},
+		ed25519.PubKeyAminoName, nil)
+	cdc.RegisterConcrete(sr25519.PubKeySr25519{},
+		sr25519.PubKeyAminoName, nil)
+	cdc.RegisterConcrete(secp256k1.PubKeySecp256k1{},
+		secp256k1.PubKeyAminoName, nil)
+	cdc.RegisterConcrete(multisig.PubKeyMultisigThreshold{},
+		multisig.PubKeyMultisigThresholdAminoRoute, nil)
 
-	cdc.RegisterInterface((*crypto.PrivKey)(nil), nil)
+	cdc.RegisterInterface((*crypto.PrivKeyInterface)(nil), nil)
 	cdc.RegisterConcrete(ed25519.PrivKeyEd25519{},
 		ed25519.PrivKeyAminoName, nil)
-	// cdc.RegisterConcrete(sr25519.PrivKeySr25519{},
-	// 	sr25519.PrivKeyAminoName, nil)
-	// cdc.RegisterConcrete(secp256k1.PrivKeySecp256k1{},
-	// 	secp256k1.PrivKeyAminoName, nil)
+	cdc.RegisterConcrete(sr25519.PrivKeySr25519{},
+		sr25519.PrivKeyAminoName, nil)
+	cdc.RegisterConcrete(secp256k1.PrivKeySecp256k1{},
+		secp256k1.PrivKeyAminoName, nil)
 }
 
 // RegisterKeyType registers an external key type to allow decoding it from bytes
